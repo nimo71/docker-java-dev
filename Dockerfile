@@ -20,13 +20,6 @@ RUN apt-get install -y rlwrap
 # Fixes empty home
 ENV HOME /root
 
-WORKDIR /root
-RUN git clone https://$GITHUB_PAT@github.com/nimo71/java.emacs.d.git
-RUN mv java.emacs.d .emacs.d
-WORKDIR /root/.emacs.d
-RUN git submodule init
-RUN git submodule update
-
 # Ant
 RUN apt-get install -y ant
 
@@ -47,12 +40,7 @@ RUN mv eclim_2.5.0.jar /home/eclim
 
 USER eclim
 ENV HOME /home/eclim
-WORKDIR $HOME
-RUN git clone https://github.com/ervandew/eclim.git
-WORKDIR $HOME/eclim
-#RUN ant -Declipse.home=/opt/eclipse eclipse.init
 RUN /opt/eclipse/eclipse -initialize
-#RUN ant -Declipse.home=/opt/eclipse -Declipse.local=$HOME/.eclipse/org.eclipse.platform_4.5.2_1473617060_linux_gtk_x86_64 -Dvim.skip=true
 
 WORKDIR $HOME
 RUN Xvfb :1 -screen 0 1024x768x24 & 
@@ -60,8 +48,14 @@ RUN DISPLAY=:1 /opt/eclipse/eclipse -nosplash -consolelog -debug -application or
 
 RUN java -Dvim.skip=true -Declipse.home=/opt/eclipse -Declipse.local=$HOME/.eclipse/org.eclipse.platform_4.5.2_1473617060_linux_gtk_x86_64 -jar eclim_2.5.0.jar install
 
-#####ENV DISPLAY :1 
-#####RUN ./eclipse/eclimd -b
+RUN git clone https://$GITHUB_PAT@github.com/nimo71/java.emacs.d.git
+RUN mv java.emacs.d .emacs.d 
+WORKDIR $HOME/.emacs.d
+RUN git submodule init
+RUN git submodule update
+WORKDIR $HOME
+
+RUN DISPLAY=:1 .eclipse/org.eclipse.platform_4.5.2_1473617060_linux_gtk_x86_64/eclimd -b
 
 # TODO:
 # - additional eclipse features as described on http://eclim.org/install.html#install-headless ???
